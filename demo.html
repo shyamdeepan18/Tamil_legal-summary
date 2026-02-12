@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamil Legal Document Summarizer - Demo</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #FFF5F0 0%, #E3F2FD 100%);
+            min-height: 100vh;
+        }
+
+        .tamil-text {
+            font-family: 'Noto Sans Tamil', sans-serif;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+            color: #F37254;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area {
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area:hover {
+            border-color: #F37254;
+            background: #FFF5F0;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            color: #999;
+        }
+
+        .btn-primary {
+            background: #F37254;
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #e55a3a;
+        }
+
+        .trust-signals {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .trust-card {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .trust-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .pricing {
+            margin: 3rem 0;
+        }
+
+        .pricing h3 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .price-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .price-card.popular {
+            border-color: #F37254;
+            box-shadow: 0 8px 24px rgba(243, 114, 84, 0.2);
+            transform: scale(1.05);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #F37254;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 0 10px 0 10px;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #F37254;
+            margin: 1rem 0;
+        }
+
+        .features {
+            list-style: none;
+            text-align: left;
+            margin: 1.5rem 0;
+        }
+
+        .features li {
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .demo-notice {
+            background: #FFF3CD;
+            border: 2px solid #FFC107;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .demo-notice strong {
+            color: #856404;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                <div>
+                    <h1>Tamil Legal Document Summarizer</h1>
+                    <p class="subtitle tamil-text">தமிழ் சட்ட ஆவண சுருக்கம்</p>
+                </div>
+            </div>
+            <button class="btn-primary"
+                onclick="alert('Login functionality requires specific backend auth routes. This is a demo UI.')">Login</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="demo-notice">
+            <strong>📢 Demo Preview</strong><br>
+            This is a static preview. Full functionality requires Node.js installation and backend server running.
+        </div>
+
+        <div class="hero">
+            <h2>📄 Understand Your Legal Documents in 60 Seconds</h2>
+            <p>Upload → ₹49 → Get Summary</p>
+            <p class="tamil-text" style="color: #999;">உங்கள் சட்ட ஆவணங்களை 60 வினாடிகளில் புரிந்து கொள்ளுங்கள்</p>
+        </div>
+
+        <div class="upload-area"
+            onclick="alert('To enable upload, please install Node.js and run the full application. See QUICK_START.md for instructions.')">
+            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+            </svg>
+            <h3 style="margin-bottom: 1rem;">📁 Drag & Drop PDF Here</h3>
+            <p style="color: #666; margin-bottom: 0.5rem;">or</p>
+            <button class="btn-primary">Browse Files</button>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: #999;">
+                Supported: PDF only • Max size: 10MB • Max pages: 30<br>
+                <span class="tamil-text">PDF மட்டும் • அதிகபட்சம்: 10MB</span>
+            </p>
+        </div>
+
+        <div class="trust-signals">
+            <div class="trust-card">
+                <svg class="trust-icon" style="color: #28A745;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                    </path>
+                </svg>
+                <div>
+                    <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Auto-Deleted</h3>
+                    <p style="font-size: 0.875rem; color: #666;">Your document is deleted after 15 minutes</p>
+                    <p class="tamil-text" style="font-size: 0.875rem; color: #999;">15 நிமிடங்களில் தானாக நீக்கப்படும்
+                    </p>
+                </div>
+            </div>
+
+            <div class="trust-card">
+                <svg class="trust-icon" style="color: #28A745;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">No Storage</h3>
+                    <p style="font-size: 0.875rem; color: #666;">We don't store your PDFs permanently</p>
+                    <p class="tamil-text" style="font-size: 0.875rem; color: #999;">நிரந்தர சேமிப்பு இல்லை</p>
+                </div>
+            </div>
+
+            <div class="trust-card">
+                <svg class="trust-icon" style="color: #4472C4;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+                <div>
+                    <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Red Flags Detection</h3>
+                    <p style="font-size: 0.875rem; color: #666;">Automatic detection of concerning patterns</p>
+                    <p class="tamil-text" style="font-size: 0.875rem; color: #999;">சிக்கல்களை தானாக கண்டறியும்</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="pricing">
+            <h3>💰 Pricing</h3>
+            <div class="pricing-grid">
+                <div class="price-card">
+                    <h4>First Doc FREE</h4>
+                    <div class="price">₹0</div>
+                    <ul class="features">
+                        <li>✓ 2 pages / per user</li>
+                        <li>✓ Basic Summary</li>
+                        <li>✗ No history saved</li>
+                    </ul>
+                </div>
+
+                <div class="price-card popular">
+                    <div class="popular-badge">POPULAR</div>
+                    <h4>Quick Check</h4>
+                    <div class="price">₹49</div>
+                    <ul class="features">
+                        <li>✓ Single Document</li>
+                        <li>✓ Red Flags Detection</li>
+                        <li>✓ Tamil+English Summary</li>
+                        <li>✗ No history saved</li>
+                    </ul>
+                </div>
+
+                <div class="price-card">
+                    <h4>Monthly Pack</h4>
+                    <div class="price">₹499/mo</div>
+                    <ul class="features">
+                        <li>✓ 15 Documents</li>
+                        <li>✓ 30 Days Validity</li>
+                        <li>✓ Save 33%</li>
+                        <li>✗ No history saved</li>
+                    </ul>
+                </div>
+
+                <div class="price-card">
+                    <h4>Pro (Brokers)</h4>
+                    <div class="price" style="color: #4472C4;">₹1,999/mo</div>
+                    <ul class="features">
+                        <li>✓ Unlimited / 200 Docs</li>
+                        <li>✓ Comparison Table</li>
+                        <li>✓ History & Search</li>
+                        <li style="font-size: 0.8rem; color: #4472C4;">Ideal for Lawyers, Govt Officers & Professionals
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: white; border-radius: 12px; padding: 2rem; margin: 3rem 0;">
+            <h3 style="text-align: center; margin-bottom: 2rem;">💬 What Users Say</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div style="border-left: 4px solid #F37254; padding-left: 1rem;">
+                    <p style="color: #333; margin-bottom: 0.5rem;">"Found a court case I didn't know about! Saved me
+                        from a bad purchase."</p>
+                    <p style="font-size: 0.875rem; color: #999;">- Ramesh K., Chennai</p>
+                </div>
+                <div style="border-left: 4px solid #F37254; padding-left: 1rem;">
+                    <p style="color: #333; margin-bottom: 0.5rem;">"Saved ₹5,000 on lawyer fees. Quick and accurate!"
+                    </p>
+                    <p style="font-size: 0.875rem; color: #999;">- Priya S., Coimbatore</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; font-size: 0.875rem; color: #666; margin: 2rem 0;">
+            <p style="font-weight: 600; margin-bottom: 0.5rem;">Supported Documents:</p>
+            <p>
+                Sale Deeds (விற்பனை பத்திரம்) • Agreements (ஒப்பந்தம்) •
+                Encumbrance Certificates • Power of Attorney • Court Orders •
+                Loan/Lease Documents
+            </p>
+        </div>
+    </main>
+
+    <footer>
+        <p style="margin-bottom: 0.5rem;">
+            ⚖️ Disclaimer: This is automated analysis, not legal advice.
+            Consult a lawyer for important decisions.
+        </p>
+        <p class="tamil-text" style="font-size: 0.75rem; color: #999; margin-bottom: 1rem;">
+            இது தானியங்கி பகுப்பாய்வு, சட்ட ஆலோசனை அல்ல
+        </p>
+        <div style="display: flex; gap: 2rem; justify-content: center; font-size: 0.875rem;">
+            <a href="#" style="color: #F37254; text-decoration: none;">Privacy Policy</a>
+            <a href="#" style="color: #F37254; text-decoration: none;">Terms of Service</a>
+            <a href="#" style="color: #F37254; text-decoration: none;">Refund Policy</a>
+        </div>
+    </footer>
+</body>
+
+</html>
