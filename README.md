@@ -1,170 +1,137 @@
-# Tamil Legal Document Summarizer MVP
+# Tamil Legal Document Summarizer & Intelligent OCR Pipeline
 
-A privacy-focused Tamil legal document analysis platform that helps users understand legal documents in simple Tamil and English.
+An end-to-end multi-tier AI platform for legal document digitization and natural language summarization. This system processes complex, scanned regional language legal documents (Tamil), performs deep learning OCR text extraction, and feeds normalized legal text through a cost-optimized, multi-provider LLM router (Google Gemini, Groq, OpenAI) to generate structured case summaries, key dates, party obligations, and risk factors.
 
-## 🚀 Quick Start
+---
 
-### Backend Setup
+## 📌 Problem Statement
 
+Legal documents in regional languages like Tamil often exist only as legacy physical scans or low-resolution PDFs. Legal practitioners and clients face high barrier-to-entry costs and manual cognitive overhead parsing hundreds of pages of legalese. 
+
+**Tamil Legal Summarizer** bridges this gap by:
+1. Extracting high-accuracy Tamil text from noisy document scans using an integrated ABINet / CRNN deep learning OCR model.
+2. Routing extracted text dynamically through cost-effective LLM backends with automated failover (Gemini Flash $\to$ Groq LLaMA $\to$ OpenAI).
+3. Producing bilingual, deterministic summaries highlighting critical clauses, case citations, party obligations, and timeline analysis.
+
+---
+
+## 🏛️ System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Client["Frontend Layer (Vite + React)"]
+        UI["Document Upload & Viewer (SummaryPage.jsx)"]
+    end
+
+    subgraph API["FastAPI Gateway (backend/main.py)"]
+        MW["Middleware (SlowAPI Rate Limiter, Session Auth)"]
+        Router["API Routing (/api/upload, /api/summary)"]
+    end
+
+    subgraph OCR["Document Intelligence Engine"]
+        TOCR["Tamil Deep Learning OCR (ABINet / CRNN)"]
+    end
+
+    subgraph LLM["Multi-Provider LLM Router (backend/services/llm_service.py)"]
+        Detector["Provider Selector & Failover Engine"]
+        Gemini["Google Gemini 1.5 Flash (Default / High Speed)"]
+        Groq["Groq LLaMA-3 (Ultra-Low Latency Fallback)"]
+        OpenAI["OpenAI GPT-4o (Paid Tier / High Complexity)"]
+    end
+
+    subgraph Storage["Data & Session Layer"]
+        DB["SQLite / PostgreSQL + Supabase Session Auth"]
+    end
+
+    UI -->|PDF / Scanned Image| MW
+    MW --> Router
+    Router -->|Raw Document| TOCR
+    TOCR -->|Extracted Legal Text| Detector
+    Detector -->|Priority 1| Gemini
+    Detector -->|Priority 2| Groq
+    Detector -->|Priority 3| OpenAI
+    Gemini -->|Structured Summary JSON| Router
+    Groq -->|Structured Summary JSON| Router
+    OpenAI -->|Structured Summary JSON| Router
+    Router --> DB
+    Router -->|Case Summary & Action Points| UI
+```
+
+---
+
+## 🌟 Key Engineering Features
+
+- **Multi-Provider LLM Router with Cost Optimization:**
+  - `LLMService` in [`backend/services/llm_service.py`](backend/services/llm_service.py) automatically detects configured API keys (`GOOGLE_API_KEY`, `GROQ_API_KEY`, `OPENAI_API_KEY`) and defaults to high-throughput, free/low-cost models (Gemini Flash / Groq) before escalating to paid providers.
+- **Deep Learning Tamil OCR Subsystem:**
+  - Packaged OCR engine utilizing ABINet/CRNN architectures for robust character recognition of Tamil typography.
+- **Resilient API Architecture:**
+  - Built on **FastAPI** with `slowapi` rate limiting, trusted host protection, asynchronous request lifecycles, and CORS security.
+- **Scheduled Background Cleanup:**
+  - Background scheduler (`cron_jobs.py`) that periodically cleans temporary upload artifacts to avoid disk leaks.
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/upload` | Uploads scanned legal document (PDF, PNG, JPG) for OCR processing |
+| `POST` | `/api/summary/generate` | Triggers multi-provider LLM generation for legal breakdown |
+| `GET` | `/api/summary/{id}` | Fetches cached summary breakdown (overview, parties, risks, timeline) |
+| `POST` | `/routes/auth/*` | Session management and authentication |
+| `GET` | `/health` | System diagnostics & OCR worker health check |
+
+---
+
+## 🚀 Setup & Installation
+
+### 1. Prerequisites
+- Python 3.10+
+- Node.js 18+ (for frontend)
+- Tesseract / PyTorch dependencies for OCR
+
+### 2. Backend Setup
 ```bash
-cd backend
+# Clone the repository
+git clone https://github.com/shyamdeepan18/Tamil_legal-summary.git
+cd Tamil_legal-summary/backend
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Virtual environment setup
+python3 -m venv venv
+source venv/bin/activate
 
-# Install dependencies
+# Install requirements
 pip install -r requirements.txt
 
-# Setup environment variables
+# Configure environment
 cp .env.example .env
-# Edit .env with your API keys
-
-# Run server
-python main.py
 ```
 
-Backend will run on `http://localhost:8000`
+Configure your `.env` file:
+```env
+GOOGLE_API_KEY="your-gemini-api-key"
+GROQ_API_KEY="your-groq-api-key"        # Optional fallback
+OPENAI_API_KEY="your-openai-api-key"    # Optional fallback
+SUPABASE_URL="your-supabase-url"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+SECRET_KEY="your-jwt-secret-key"
+```
 
-### Frontend Setup
-
+Start the FastAPI backend:
 ```bash
-cd frontend
+uvicorn main:app --reload --port 8000
+```
 
-# Install dependencies
+### 3. Frontend Setup
+```bash
+cd ../frontend
 npm install
-
-# Run development server
 npm run dev
 ```
+Access the application at `http://localhost:3000`.
 
-Frontend will run on `http://localhost:3000`
+---
 
-## 📋 Environment Variables
-
-Create a `.env` file in the `backend` directory:
-
-```env
-# Razorpay
-RAZORPAY_KEY_ID=your_key_id
-RAZORPAY_KEY_SECRET=your_key_secret
-RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
-
-# OpenAI
-OPENAI_API_KEY=your_openai_key
-
-# Supabase
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# Encryption
-ENCRYPTION_KEY=your_fernet_key
-```
-
-## 🏗️ Project Structure
-
-```
-Tamil OCR/
-├── backend/
-│   ├── main.py                 # FastAPI app entry point
-│   ├── config.py               # Configuration settings
-│   ├── api/
-│   │   ├── upload.py           # File upload endpoint
-│   │   ├── payment.py          # Razorpay integration
-│   │   └── summary.py          # Summary retrieval
-│   └── services/
-│       ├── ocr_service.py      # Tamil OCR processing
-│       ├── classifier.py       # Document classification
-│       ├── preview_generator.py # Pre-payment preview
-│       ├── red_flags.py        # Red flags detection
-│       └── llm_service.py      # LLM summarization
-└── frontend/
-    ├── src/
-    │   ├── pages/
-    │   │   ├── UploadPage.jsx  # Main upload page
-    │   │   └── SummaryPage.jsx # Summary display
-    │   └── components/
-    │       ├── FileUpload.jsx  # Drag-and-drop upload
-    │       ├── PreviewModal.jsx # Preview before payment
-    │       └── PaymentButton.jsx # Razorpay payment
-    └── package.json
-```
-
-## 🔑 Key Features
-
-- **Privacy-First**: Auto-delete documents after 15 minutes
-- **Pre-Payment Preview**: See document quality before paying
-- **Red Flags Detection**: Automatic detection of concerning patterns
-- **Bilingual**: Tamil + English mixed naturally
-- **Document Types**: Sale Deeds, Agreements, EC, POA, Court Orders, etc.
-- **Pricing**: ₹49 Quick Check | ₹99 Standard | ₹1,999/mo Pro
-
-## 📝 API Endpoints
-
-- `POST /api/upload` - Upload and validate PDF
-- `POST /api/create-order` - Create Razorpay order
-- `POST /api/verify-payment` - Verify payment
-- `GET /api/summary/{upload_id}` - Get summary
-- `POST /api/webhook` - Razorpay webhook
-
-## 🧪 Testing
-
-```bash
-# Backend tests
-cd backend
-pytest
-
-# Frontend tests
-cd frontend
-npm test
-```
-
-## 🚢 Deployment
-
-### Backend (Recommended: AWS Mumbai / Google Cloud India)
-
-```bash
-# Using Docker
-docker build -t tamil-doc-backend .
-docker run -p 8000:8000 tamil-doc-backend
-
-# Or using PM2
-pm2 start main.py --name tamil-doc-api
-```
-
-### Frontend
-
-```bash
-# Build for production
-npm run build
-
-# Deploy to Vercel/Netlify
-# Or serve with nginx
-```
-
-## 📊 Success Metrics
-
-| Metric | Week 1 | Month 1 | Month 3 |
-|--------|--------|---------|---------|
-| Uploads | 50 | 500 | 2,000 |
-| Paid Conversions | 10 | 100 | 500 |
-| Revenue | ₹500 | ₹11,000 | ₹60,000 |
-
-## ⚠️ Important Notes
-
-1. **OCR Integration**: Replace placeholder OCR in `services/ocr_service.py` with your Tamil OCR code
-2. **Razorpay**: Complete KYC before going live
-3. **Privacy**: Ensure cleanup cron runs every 5 minutes
-4. **Disclaimer**: Always display "not legal advice" prominently
-
-## 📞 Support
-
-For issues or questions, contact: [your-email]
-
-## 📄 License
-
-Proprietary - All rights reserved
+## 📜 License
+MIT License. Built for legal accessibility and AI research.
